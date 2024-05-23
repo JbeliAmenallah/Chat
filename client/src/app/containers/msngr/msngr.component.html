@@ -1,0 +1,29 @@
+<div>
+    <input [(ngModel)]="username" placeholder="Your username">
+    <input [(ngModel)]="recipient" placeholder="Recipient's username">
+    <button (click)="joinChat()">Join Chat</button>
+   </div>
+   <div>
+    <input [(ngModel)]="message" placeholder="Type your message">
+    <button (click)="sendMessage()">Send</button>
+   </div>
+   <div *ngFor="let msg of messages">
+    {{msg.sender}}: {{msg.message}}
+   </div>
+
+   <div>
+    <div style="padding: 20; font-size: large;">
+        ALL CHATROOMS 
+    </div>
+    <div (click)="fetchOldMessages(chatroom._id)" style="padding: 20; font-size: medium;color:aqua" *ngFor="let chatroom of chatRooms">
+        {{chatroom}}
+        {{chatroom.name}}
+    </div>
+    <div>
+        <button (click)="clearNotifications()">Clear Notifications</button>
+        <div *ngIf="unreadCount > 0" class="notification-badge">{{ unreadCount }}</div>
+        <div *ngFor="let notification of notifications">
+          {{ notification }}
+        </div>
+      </div>
+   </div>
