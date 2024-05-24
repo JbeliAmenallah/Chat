@@ -1,29 +1,45 @@
-<div>
-    <input [(ngModel)]="username" placeholder="Your username">
-    <input [(ngModel)]="recipient" placeholder="Recipient's username">
-    <button (click)="joinChat()">Join Chat</button>
-   </div>
-   <div>
-    <input [(ngModel)]="message" placeholder="Type your message">
-    <button (click)="sendMessage()">Send</button>
-   </div>
-   <div *ngFor="let msg of messages">
-    {{msg.sender}}: {{msg.message}}
-   </div>
-
-   <div>
-    <div style="padding: 20; font-size: large;">
-        ALL CHATROOMS 
+<div class="chat-app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <input [(ngModel)]="username" placeholder="Your username" class="username-input">
+      <button (click)="joinChat()" class="join-button">Join Chat</button>
     </div>
-    <div (click)="fetchOldMessages(chatroom._id)" style="padding: 20; font-size: medium;color:aqua" *ngFor="let chatroom of chatRooms">
-        {{chatroom}}
-        {{chatroom.name}}
-    </div>
-    <div>
-        <button (click)="clearNotifications()">Clear Notifications</button>
-        <div *ngIf="unreadCount > 0" class="notification-badge">{{ unreadCount }}</div>
-        <div *ngFor="let notification of notifications">
-          {{ notification }}
-        </div>
+    <div class="chat-rooms">
+      <div class="chat-rooms-header">All Chat Rooms</div>
+      <div (click)="fetchOldMessages(chatroom._id)" class="chat-room" *ngFor="let chatroom of chatRooms">
+        {{ chatroom.name }}
       </div>
-   </div>
+    </div>
+    <div class="notifications-section">
+      <button (click)="clearNotifications()" class="clear-notifications-button">Clear Notifications</button>
+      <div *ngIf="unreadCount > 0" class="notification-badge">{{ unreadCount }}</div>
+      <div *ngFor="let notification of notifications" class="notification">
+        {{ notification }}
+      </div>
+    </div>
+  </div>
+  <div class="chat-content">
+    <div class="chat-header">
+      <input [(ngModel)]="recipient" placeholder="Recipient's username" class="recipient-input">
+    </div>
+    <div class="messages">
+      <div *ngFor="let msg of messages" class="message" [ngClass]="{'my-message': msg.sender === username}">
+        <div class="message-bubble">
+          <strong>{{ msg.sender }}:</strong> {{ msg.message }}
+        </div>
+        <!-- Edit button for each message -->
+        <button *ngIf="msg.sender === username" (click)="initiateEditMessage(msg._id, msg.message)">Edit</button>
+      </div>
+    </div>
+    
+    <div class="message-input">
+      <input [(ngModel)]="message" placeholder="Type your message" class="message-input-field">
+      <button (click)="sendMessage()" class="send-button">Send</button>
+    </div>
+    <!-- Edit message section -->
+    <div *ngIf="messageIdToEdit" class="edit-message-section">
+      <input [(ngModel)]="newContent" placeholder="Edit your message" class="edit-input-field">
+      <button (click)="editMessage()" class="edit-button">Save Edit</button>
+    </div>
+  </div>
+</div>

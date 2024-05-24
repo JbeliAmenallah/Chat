@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { ChatRoom } = require('../models/models');
-const { User } = require('../models/models');
+const { ChatRoom, Message, User } = require('../models/models');
 
 router.get('/chatrooms/:roomId/messages', async (req, res) => {
     try {
@@ -20,7 +19,7 @@ router.get('/chatrooms/:roomId/messages', async (req, res) => {
 router.get('/chatrooms/:username', async (req, res) => {
     try {
         const username = req.params.username;
-        const user = await User.findOne({ username }); // Find the user by username
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -31,4 +30,45 @@ router.get('/chatrooms/:username', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+router.patch('/messages/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { newContent, username } = req.body;
+
+        // Find the message by ID
+        const message = await Message.findById(id);
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        // Ensure the sender is the one who created the message
+        const senderUser = await User.findOne({ username });
+        if (!senderUser || message.sender.toString() !== senderUser._id.toString()) {
+            return res.status(403).json({ error: 'Not authorized to edit this message' });
+        }
+
+        // Update the message content
+        message.message = newContent;
+        await message.save();
+
+        // Find the chat room
+        const chatRoom = await ChatRoom.findOne({
+            participants: { $all: [message.sender, message.recipient] },
+        });
+
+        // Emit the updated message to all clients in the chat room
+        io.to(chatRoom.name).emit("messageEdited", {
+            messageId: message._id,
+            newContent,
+            sender: senderUser.username,
+        });
+
+        res.json(message);
+    } catch (error) {
+        console.error('Error editing message:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;
