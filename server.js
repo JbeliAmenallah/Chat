@@ -170,7 +170,7 @@ io.on("connection", (socket) => {
   // Server-side code
   socket.on("typing", ({ sender, recipient, isTyping }) => {
     console.log(`${sender} is typing to ${recipient}`);
-    io.to(recipient).emit("typing", { sender, recipient, isTyping });
+    io.emit("typing", { sender, recipient, isTyping });
     console.log("Typing event emitted to recipient:", recipient);
   });
   
