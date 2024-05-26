@@ -200,4 +200,14 @@ body, html {
     display: block;
     margin-bottom: 5px;
   }
+  .typing-indicator {
+    font-style: italic;
+    color: #999; /* You can adjust the color */
+    margin-top: 5px;
+  }
+  
+  .typing-indicator span {
+    font-weight: bold;
+    color: #333; /* You can adjust the color */
+  }
   

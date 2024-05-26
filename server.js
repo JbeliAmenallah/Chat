@@ -166,7 +166,20 @@ io.on("connection", (socket) => {
       socket.emit("error", "An error occurred while editing the message");
     }
   });
+  // Server-side code
+  // Server-side code
+  socket.on("typing", ({ sender, recipient, isTyping }) => {
+    console.log(`${sender} is typing to ${recipient}`);
+    io.to(recipient).emit("typing", { sender, recipient, isTyping });
+    console.log("Typing event emitted to recipient:", recipient);
+  });
+  
 
+  
+
+  
+      
+  
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });

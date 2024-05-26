@@ -27,19 +27,27 @@
         <div class="message-bubble">
           <strong>{{ msg.sender }}:</strong> {{ msg.message }}
         </div>
-        <!-- Edit button for each message -->
         <button *ngIf="msg.sender === username" (click)="initiateEditMessage(msg._id, msg.message)">Edit</button>
       </div>
     </div>
     
     <div class="message-input">
-      <input [(ngModel)]="message" placeholder="Type your message" class="message-input-field">
+      <input [(ngModel)]="message" placeholder="Type your message" class="message-input-field" (keydown)="handleTyping()" (blur)="chatService.typing(username, recipient, false)">
       <button (click)="sendMessage()" class="send-button">Send</button>
     </div>
-    <!-- Edit message section -->
+    
     <div *ngIf="messageIdToEdit" class="edit-message-section">
       <input [(ngModel)]="newContent" placeholder="Edit your message" class="edit-input-field">
       <button (click)="editMessage()" class="edit-button">Save Edit</button>
     </div>
+
+    <div class="typing-indicators">
+      <div *ngFor="let user of typingUsers" class="typing-indicator">
+        <span>{{ user }} is typing...</span>
+      </div>
+    </div>
   </div>
+</div>
+<div>
+  Typing Users: {{ typingUsers | json }}
 </div>

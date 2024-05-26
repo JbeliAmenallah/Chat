@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ChatService } from 'src/app/services/chat.service';
 import { HttpClient } from '@angular/common/http';
+import { mergeMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-msngr',
   templateUrl: './msngr.component.html',
   styleUrls: ['./msngr.component.scss']
 })
-export class MsngrComponent {
+export class MsngrComponent implements OnInit {
   messages: any[] = [];
   username!: string;
   recipient!: string;
@@ -18,30 +19,36 @@ export class MsngrComponent {
   chatRooms: any[] = [];
   messageIdToEdit!: string | null;
   newContent!: string;
+  typingUsers: string[] = [];
 
-  constructor(private chatService: ChatService, private http: HttpClient) {}
+  constructor(public chatService: ChatService, private http: HttpClient) {}
 
   ngOnInit() {
-    this.chatService.getMessages().subscribe((message) => {
-      this.messages.push(message);
-    });
-    this.chatService.getNotifications().subscribe((notification) => {
-      this.notifications.push(notification);
-      this.unreadCount++;
-    });
+    this.chatService.getMessages()
+      .pipe(tap(message => this.messages.push(message)))
+      .subscribe();
+
+    this.chatService.getNotifications()
+      .pipe(tap(notification => {
+        this.notifications.push(notification);
+        this.unreadCount++;
+      }))
+      .subscribe();
+
+    this.chatService.getMessageEdited()
+      .pipe(tap(editedMessage => this.updateEditedMessage(editedMessage)))
+      .subscribe();
+
+    this.chatService.receiveTyping()
+      .pipe(tap(data => this.handleTypingEvent(data)))
+      .subscribe();
+
     this.fetchOldMessages(this.roomId);
-  
-    // Listen for messageEdited event
-    this.chatService.getMessageEdited().subscribe((editedMessage) => {
-      this.updateEditedMessage(editedMessage);
-    });
   }
-  
+
   updateEditedMessage(editedMessage: any) {
-    // Find the index of the edited message in the messages array
     const index = this.messages.findIndex(msg => msg._id === editedMessage.messageId);
     if (index !== -1) {
-      // Update the message content
       this.messages[index].message = editedMessage.newContent;
     }
   }
@@ -80,9 +87,31 @@ export class MsngrComponent {
   editMessage() {
     if (this.messageIdToEdit) {
       this.chatService.editMessage(this.messageIdToEdit, this.newContent, this.username);
-      // No need to manually update the UI here. Wait for the messageEdited event from the server.
       this.messageIdToEdit = null;
       this.newContent = '';
+    }
+  }
+
+
+
+  handleTyping() {
+    this.chatService.typing(this.username, this.recipient, true);
+  }
+
+  handleTypingEvent(data: any) {
+    console.log("Handling typing event:", data); // Add log to check data
+    if (data.recipient === this.recipient) {
+      if (data.isTyping) {
+        if (!this.typingUsers.includes(data.sender)) {
+          this.typingUsers.push(data.sender);
+        }
+      } else {
+        const index = this.typingUsers.indexOf(data.sender);
+        if (index !== -1) {
+          this.typingUsers.splice(index, 1);
+        }
+      }
+      console.log("Current typing users:", this.typingUsers); // Add log to verify typing users
     }
   }
 }
