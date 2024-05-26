@@ -100,7 +100,7 @@ export class MsngrComponent implements OnInit {
 
   handleTypingEvent(data: any) {
     console.log("Handling typing event:", data); // Add log to check data
-    if (data.recipient === this.recipient) {
+    if (data.recipient !== this.recipient) {
       if (data.isTyping) {
         if (!this.typingUsers.includes(data.sender)) {
           this.typingUsers.push(data.sender);
