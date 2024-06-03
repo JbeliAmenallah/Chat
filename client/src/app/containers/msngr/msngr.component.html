@@ -20,7 +20,10 @@
   </div>
   <div class="chat-content">
     <div class="chat-header">
-      <input [(ngModel)]="recipient" placeholder="Recipient's username" class="recipient-input">
+      <!-- <input [(ngModel)]="recipient" placeholder="Recipient's username" class="recipient-input"> -->
+      <select [(ngModel)]="recipient" class="recipient-select">
+        <option *ngFor="let user of users" [value]="user">{{ user }}</option>
+      </select>
     </div>
     <div class="messages">
       <div *ngFor="let msg of messages" class="message" [ngClass]="{'my-message': msg.sender === username}">

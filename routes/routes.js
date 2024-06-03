@@ -30,6 +30,15 @@ router.get('/chatrooms/:username', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+router.get('/users', async (req, res) => {
+    try {
+        const users = await User.find({}, 'username');
+        res.json(users.map(user => user.username));
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 router.patch('/messages/:id', async (req, res) => {
     try {

@@ -20,6 +20,8 @@ export class MsngrComponent implements OnInit {
   messageIdToEdit!: string | null;
   newContent!: string;
   typingUsers: string[] = [];
+  users: string[] = []; // Add a variable to hold the list of users
+
 
   constructor(public chatService: ChatService, private http: HttpClient) {}
 
@@ -27,6 +29,8 @@ export class MsngrComponent implements OnInit {
     this.chatService.getMessages()
       .pipe(tap(message => this.messages.push(message)))
       .subscribe();
+      this.fetchUsers();
+
 
     this.chatService.getNotifications()
       .pipe(tap(notification => {
@@ -77,6 +81,16 @@ export class MsngrComponent implements OnInit {
 
   clearNotifications() {
     this.unreadCount = 0;
+  }
+  
+  fetchUsers() {
+    this.http.get<string[]>('http://localhost:3000/api/users').subscribe(users => {
+      this.users = users;
+    });
+  }
+
+  selectRecipient(recipient: string) {
+    this.recipient = recipient;
   }
 
   initiateEditMessage(messageId: string, messageContent: string) {
